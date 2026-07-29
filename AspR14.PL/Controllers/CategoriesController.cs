@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-
-using AspR14.BLL.Services;
+﻿using AspR14.BLL.Services;
 using AspR14.DAL.DTOs.Requests;
+using AspR14.PL.Resources;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace AspR14.PL.Controllers
 {
@@ -10,27 +10,39 @@ namespace AspR14.PL.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
+        private readonly IStringLocalizer<SharedResources> _localizer;
         private readonly ICategoryService _categoryService;
 
-        public CategoriesController(ICategoryService categoryService)
+        public CategoriesController(
+            IStringLocalizer<SharedResources> localizer,
+            ICategoryService categoryService)
         {
+            _localizer = localizer;
             _categoryService = categoryService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateCategory([FromBody] CategoryRequest request)
+        [HttpGet("")]
+        public async Task<IActionResult> Index()
         {
-            var category = await _categoryService.CreateCategoryAsync(request);
+            var response = await _categoryService.GetAllCategories();
 
-            return Ok(category);
+            return Ok(new
+            {
+                message = _localizer["Success"].Value,
+                data = response
+            });
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllCategories()
+        [HttpPost("")]
+        public async Task<IActionResult> Create(CategoryRequest request)
         {
-            var categories = await _categoryService.GetAllCategoriesAsync();
+            var response = await _categoryService.CreateCategory(request);
 
-            return Ok(categories);
+            return Ok(new
+            {
+                message = _localizer["Success"].Value,
+                data = response
+            });
         }
     }
 }

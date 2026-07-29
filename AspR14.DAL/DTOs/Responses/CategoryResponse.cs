@@ -11,4 +11,3 @@ namespace AspR14.DAL.DTOs.Responses
         public string Name { get; set; } = string.Empty;
     }
 }
-}
