@@ -2,6 +2,7 @@
 using AspR14.DAL.DTOs.Responses;
 using AspR14.DAL.Models;
 using AspR14.DAL.Repositories;
+using Mapster;
 
 namespace AspR14.BLL.Services
 {
@@ -16,40 +17,22 @@ namespace AspR14.BLL.Services
 
         public async Task<List<CategoryResponse>> GetAllCategories()
         {
-            var categories = await _categoryRepository.GetAllAsync();
+            var categories = await _categoryRepository.GetAllAsync(
+            
+                new string[] {nameof(Category.Translations)}
+            );
 
-            return categories.Select(category => new CategoryResponse
-            {
-                Id = category.Id,
-                Name = category.Translations
-                    .FirstOrDefault(x => x.Language == "en")?.Name
-                    ?? string.Empty
-            }).ToList();
+            return categories.Adapt<List<CategoryResponse>>();
         }
 
         async Task<CategoryResponse> ICategoryService.CreateCategory(CategoryRequest request)
         {
-            var category = new Category
-            {
-                Translations = new List<CategoryTranslation>
-                {
-                    new CategoryTranslation
-                    {
-                        Name = request.Name,
-                        Language = "en"
-                    }
-                }
-            };
+            var category = request.Adapt<Category>();
 
             await _categoryRepository.CreateAsync(category);
 
-            return new CategoryResponse
-            {
-                Id = category.Id,
-                Name = category.Translations
-                    .FirstOrDefault(x => x.Language == "en")?.Name
-                    ?? string.Empty
-            };
+            return category.Adapt<CategoryResponse>();
         }
+        
     }
 }

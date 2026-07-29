@@ -4,28 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AspR14.DAL.Repositories
 {
-    public class CategoryRepository : ICategoryRepository
+    internal class CategoryRepository : GenericRepository<Category>, ICategoryRepository
     {
-        private readonly AppDbContext _context;
-
-        public CategoryRepository(AppDbContext context)
+        public CategoryRepository(AppDbContext context) : base(context)
         {
-            _context = context;
-        }
-
-        public async Task<Category> CreateAsync(Category category)
-        {
-           await _context.AddAsync(category);
-            await _context.SaveChangesAsync();
-
-            return category;
-        }
-
-        public async Task<List<Category>> GetAllAsync()
-        {
-            return await _context.Categories
-                .Include(c => c.Translations)
-                .ToListAsync();
+            
         }
     }
 }
