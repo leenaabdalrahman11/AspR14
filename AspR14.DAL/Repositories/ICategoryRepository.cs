@@ -2,10 +2,8 @@
 
 namespace AspR14.DAL.Repositories
 {
-    public interface ICategoryRepository
+    public interface ICategoryRepository : IGenericRepository<Category>
     {
-        Task<Category> CreateAsync(Category category);
-
-        Task<List<Category>> GetAllAsync();
+        
     }
 }
