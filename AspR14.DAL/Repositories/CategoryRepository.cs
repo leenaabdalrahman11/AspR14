@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AspR14.DAL.Repositories
 {
-    internal class CategoryRepository : GenericRepository<Category>, ICategoryRepository
+    public class CategoryRepository : GenericRepository<Category>, ICategoryRepository
     {
         public CategoryRepository(AppDbContext context) : base(context)
         {
-            
+
         }
     }
 }

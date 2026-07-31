@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AspR14.DAL.Repositories
 {
-    internal class GenericRepository<T> : IGenericRepository<T>
+    public class GenericRepository<T> : IGenericRepository<T>
  where T : class
     {
         private readonly AppDbContext _context;

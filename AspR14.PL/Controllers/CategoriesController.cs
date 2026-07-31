@@ -60,6 +60,5 @@ namespace AspR14.PL.Controllers
             }
             return Ok();
         }
-        
     }
 }
