@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AspR14.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260729125226_Identity")]
-    partial class Identity
+    [Migration("20260731165816_SeedData")]
+    partial class SeedData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
