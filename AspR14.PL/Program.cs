@@ -5,15 +5,15 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
-using AspR14.BLL.Services;
-using AspR14.DAL.Repositories;
 using AspR14.DAL.Models;
 using Microsoft.AspNetCore.Identity;
+using AspR14.PL.Utils;
+using AspR14.BLL.Common;
 namespace AspR14.PL
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +29,10 @@ namespace AspR14.PL
                     )
                 )
             );
-            builder.Services.AddIdentity<ApplicationUser,IdentityRole>()
+            builder.Services.AddIdentity<ApplicationUser,IdentityRole>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+            })
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
@@ -48,7 +51,8 @@ namespace AspR14.PL
             builder.Services.AddLocalization(options =>
                 options.ResourcesPath = "");
             builder.Services.AddScoped<ICategoryService, CategoryService>();
-            
+            builder.Services.AddScoped<ISeedData,RoleSeedData>();
+            builder.Services.AddScoped<IEmailSender,EmailSender>();
             const string defaultCulture = "en";
 
             var supportedCultures = new[]
@@ -94,6 +98,15 @@ namespace AspR14.PL
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
+            using(var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var seeders = services.GetServices<ISeedData>();
+                foreach(var seeder in seeders)
+                {
+                   await seeder.DataSeed();
+                }
+            }
 
             app.MapControllers();
 
