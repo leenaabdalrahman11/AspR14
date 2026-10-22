@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AspR14.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260729125226_Identity")]
-    partial class Identity
+    [Migration("20261003190400_AddAuditLog")]
+    partial class AddAuditLog
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -100,7 +100,7 @@ namespace AspR14.DAL.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("AspR14.DAL.Models.Category", b =>
+            modelBuilder.Entity("AspR14.DAL.Models.AuditableEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -108,9 +108,35 @@ namespace AspR14.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("auditableEntities");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("AuditableEntity");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("AspR14.DAL.Models.CategoryTranslation", b =>
@@ -270,6 +296,30 @@ namespace AspR14.DAL.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("AspR14.DAL.Models.Category", b =>
+                {
+                    b.HasBaseType("AspR14.DAL.Models.AuditableEntity");
+
+                    b.HasDiscriminator().HasValue("Category");
+                });
+
+            modelBuilder.Entity("AspR14.DAL.Models.AuditableEntity", b =>
+                {
+                    b.HasOne("AspR14.DAL.Models.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AspR14.DAL.Models.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("AspR14.DAL.Models.CategoryTranslation", b =>

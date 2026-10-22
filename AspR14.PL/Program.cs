@@ -8,7 +8,13 @@ using System.Globalization;
 using AspR14.DAL.Models;
 using Microsoft.AspNetCore.Identity;
 using AspR14.PL.Utils;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using AspR14.BLL.Common;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using AspR14.PL.Extensions;
+using AspR14.BLL.Mapping;
+
 namespace AspR14.PL
 {
     public class Program
@@ -17,68 +23,9 @@ namespace AspR14.PL
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers();
-
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
-            builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(
-                    builder.Configuration.GetConnectionString(
-                        "DefaultConnection"
-                    )
-                )
-            );
-            builder.Services.AddIdentity<ApplicationUser,IdentityRole>(options =>
-            {
-                options.User.RequireUniqueEmail = true;
-            })
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
 
 
-            builder.Services.AddScoped<
-                ICategoryRepository,
-                CategoryRepository
-            >();
-
-            builder.Services.AddScoped<
-                ICategoryService,
-                CategoryService
-            >();
-            builder.Services.AddScoped<IAuthenticationUserService,AuthenticationUserService>();
-
-            builder.Services.AddLocalization(options =>
-                options.ResourcesPath = "");
-            builder.Services.AddScoped<ICategoryService, CategoryService>();
-            builder.Services.AddScoped<ISeedData,RoleSeedData>();
-            builder.Services.AddScoped<IEmailSender,EmailSender>();
-            const string defaultCulture = "en";
-
-            var supportedCultures = new[]
-            {
-                new CultureInfo(defaultCulture),
-                new CultureInfo("ar")
-            };
-
-            builder.Services.Configure<RequestLocalizationOptions>(options =>
-            {
-                options.DefaultRequestCulture =
-                    new RequestCulture(defaultCulture);
-
-                options.SupportedCultures =
-                    supportedCultures;
-
-                options.SupportedUICultures =
-                    supportedCultures;
-
-                options.RequestCultureProviders.Clear();
-
-                options.RequestCultureProviders.Add(
-                    new AcceptLanguageHeaderRequestCultureProvider()
-                );
-            });
-
+            builder.Services.AddServicesExtensions(builder.Configuration);
             var app = builder.Build();
 
             app.UseRequestLocalization(
@@ -88,6 +35,7 @@ namespace AspR14.PL
                     >()
                     .Value
             );
+            MapesterConfig.MapsterConfigRegister();
 
             if (app.Environment.IsDevelopment())
             {
@@ -98,16 +46,7 @@ namespace AspR14.PL
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-            using(var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                var seeders = services.GetServices<ISeedData>();
-                foreach(var seeder in seeders)
-                {
-                   await seeder.DataSeed();
-                }
-            }
-
+            await app.SeedDataAsync();
             app.MapControllers();
 
             app.Run();
