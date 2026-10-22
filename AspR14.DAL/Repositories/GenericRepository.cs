@@ -7,7 +7,9 @@ using Microsoft.EntityFrameworkCore;
 namespace AspR14.DAL.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T>
- where T : class
+    
+    
+     where T : class
     {
         private readonly AppDbContext _context;
         public GenericRepository(AppDbContext context)
@@ -42,7 +44,7 @@ namespace AspR14.DAL.Repositories
         public async Task<T> GetOne(Expression<Func<T ,bool>> filter, string[]? includes=null)
         {
             IQueryable<T> query = _context.Set<T>();//Store the data in the server's RAM and wait,Jaida may edit it later 
-            if (includes != null)
+           if (includes != null)
             {
                 foreach(var include in includes)
                 {
