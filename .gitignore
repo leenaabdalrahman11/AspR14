@@ -8,3 +8,6 @@ obj/
 
 appsettings.Development.json
 /AspR14.PL/secret.json
+.vscode/
+migration-preview.sql
+rollback-preview.sql
