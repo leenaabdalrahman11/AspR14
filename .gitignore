@@ -7,3 +7,4 @@ obj/
 *.rsuser
 
 appsettings.Development.json
+/AspR14.PL/secret.json

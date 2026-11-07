@@ -1,6 +1,8 @@
-﻿using AspR14.BLL.Services;
+﻿using System.Security.Claims;
+using AspR14.BLL.Services;
 using AspR14.DAL.DTOs.Requests;
 using AspR14.PL.Resources;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
@@ -8,6 +10,7 @@ namespace AspR14.PL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoriesController : ControllerBase
     {
         private readonly IStringLocalizer<SharedResources> _localizer;
@@ -35,7 +38,7 @@ namespace AspR14.PL.Controllers
 
         [HttpPost("")]
         public async Task<IActionResult> Create(CategoryRequest request)
-        {
+        {   
             var response = await _categoryService.CreateCategory(request);
 
             return Ok(new

@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Globalization;
+using System.Linq.Expressions;
 using AspR14.DAL.DTOs.Requests;
 using AspR14.DAL.DTOs.Responses;
 using AspR14.DAL.Models;
@@ -20,15 +21,14 @@ namespace AspR14.BLL.Services
         {
             var categories = await _categoryRepository.GetAllAsync(
             
-                new string[] {nameof(Category.Translations)}
+                new string[] {nameof(Category.Translations), nameof(Category.CreatedBy)}
             );
-
             return categories.Adapt<List<CategoryResponse>>();
         }
 
         public async Task<CategoryResponse> GetCategory(Expression<Func<Category, bool>> filter)
         {
-            var category = await _categoryRepository.GetOne(filter, new string[] {nameof(Category.Translations)});
+            var category = await _categoryRepository.GetOne(filter, new string[] {nameof(Category.Translations), nameof(Category.CreatedBy)});
             return category.Adapt<CategoryResponse>();
         }
 
