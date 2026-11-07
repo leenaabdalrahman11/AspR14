@@ -42,35 +42,40 @@ namespace AspR14.DAL.Data
                     entry.Property(x => x.UpdatedOn).CurrentValue = DateTime.UtcNow;
                 }
             }
-            
+
             return base.SaveChangesAsync(cancellationToken);
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Category>()
-                .HasOne(c => c.CreatedBy)
-                .WithMany()
-                .HasForeignKey(t => t.CreatedById)
-                .OnDelete(DeleteBehavior.Cascade);
-            
-            modelBuilder.Entity<Category>()
-                .HasOne(c => c.UpdatedBy)
-                .WithMany()
-                .HasForeignKey(t => t.UpdatedById)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<Product>()
-                .HasOne(c => c.CreatedBy)
-                .WithMany()
-                .HasForeignKey(t => t.CreatedById)
-                .OnDelete(DeleteBehavior.Cascade);
-            
-            modelBuilder.Entity<Product>()
-                .HasOne(c => c.UpdatedBy)
-                .WithMany()
-                .HasForeignKey(t => t.UpdatedById)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-        }
+{
+    base.OnModelCreating(modelBuilder);
+
+    modelBuilder.Entity<Category>()
+        .HasOne(c => c.CreatedBy)
+        .WithMany()
+        .HasForeignKey(c => c.CreatedById)
+        .OnDelete(DeleteBehavior.NoAction);
+
+    modelBuilder.Entity<Category>()
+        .HasOne(c => c.UpdatedBy)
+        .WithMany()
+        .HasForeignKey(c => c.UpdatedById)
+        .OnDelete(DeleteBehavior.NoAction);
+
+    modelBuilder.Entity<Product>()
+        .HasOne(p => p.CreatedBy)
+        .WithMany()
+        .HasForeignKey(p => p.CreatedById)
+        .OnDelete(DeleteBehavior.NoAction);
+
+    modelBuilder.Entity<Product>()
+        .HasOne(p => p.UpdatedBy)
+        .WithMany()
+        .HasForeignKey(p => p.UpdatedById)
+        .OnDelete(DeleteBehavior.NoAction);
+
+    modelBuilder.ApplyConfigurationsFromAssembly(
+        typeof(AppDbContext).Assembly);
+}
+   
     }
 }

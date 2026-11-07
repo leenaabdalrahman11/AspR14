@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AspR14.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -12,8 +8,11 @@ namespace AspR14.DAL.Configuration
     {
         public void Configure(EntityTypeBuilder<Product> builder)
         {
+            builder.Property(p => p.Price)
+                .HasPrecision(18, 2);
+
             builder.HasMany(p => p.Translations)
-               .WithOne(t => t.Product);
+                .WithOne(t => t.Product);
         }
     }
 }
