@@ -29,11 +29,7 @@ namespace AspR14.PL.Controllers
         {
             var response = await _categoryService.GetAllCategories();
 
-            return Ok(new
-            {
-                message = _localizer["Success"].Value,
-                data = response
-            });
+            return response.IsSuccess ? Ok(response) : BadRequest(response);
         }
 
         [HttpPost("")]
@@ -41,27 +37,19 @@ namespace AspR14.PL.Controllers
         {   
             var response = await _categoryService.CreateCategory(request);
 
-            return Ok(new
-            {
-                message = _localizer["Success"].Value,
-                data = response
-            });
+            return response.IsSuccess ? Ok(response) : BadRequest(response);
         }
         [HttpGet("id")]
         public async Task<IActionResult> GetById(int id)
         {
             var category = await _categoryService.GetCategory(c => c.Id == id);
-            return Ok(category);
+            return category.IsSuccess ? Ok(category) : NotFound(category);
         }
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var delete = await _categoryService.DeleteCategory(id);
-            if (!delete)
-            {
-                return BadRequest();
-            }
-            return Ok();
+            return delete.IsSuccess ? Ok(delete) : NotFound(delete);
         }
     }
 }

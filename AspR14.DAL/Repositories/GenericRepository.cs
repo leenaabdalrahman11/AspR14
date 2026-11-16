@@ -54,6 +54,13 @@ namespace AspR14.DAL.Repositories
             }
             return await query.FirstOrDefaultAsync(filter);
         }
+        public async Task<bool> UpdateAsync(T request)
+        {
+            _context.Update(request);
+            var affected = await _context.SaveChangesAsync();
+            return affected > 0;
+        }
+
         public async Task<bool> DeleteAsync(T request)
         {
             _context.Remove(request);

@@ -27,7 +27,7 @@ namespace AspR14.PL
 
             builder.Services.AddServicesExtensions(builder.Configuration);
             var app = builder.Build();
-
+            app.UseExceptionHandler();
             app.UseRequestLocalization(
                 app.Services
                     .GetRequiredService<
@@ -35,6 +35,18 @@ namespace AspR14.PL
                     >()
                     .Value
             );
+            app.UseRequestLocalization(
+    app.Services
+        .GetRequiredService<IOptions<RequestLocalizationOptions>>()
+        .Value
+);
+
+            app.Use(async (context, next) =>
+            {
+                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
+
+                await next();
+            });
             MapesterConfig.MapsterConfigRegister();
 
             if (app.Environment.IsDevelopment())
@@ -42,7 +54,7 @@ namespace AspR14.PL
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseStaticFiles();
             app.UseHttpsRedirection();
 
             app.UseAuthorization();

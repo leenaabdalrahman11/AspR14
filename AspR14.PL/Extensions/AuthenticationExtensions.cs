@@ -10,6 +10,7 @@ namespace AspR14.PL.Extensions
 {
     public static class AuthenticationExtensions
     {
+        
         public static IServiceCollection AddAuthenticationExtensions(this IServiceCollection services, IConfiguration configuration)
         {
             var jwtSettings = configuration.GetSection("JwtSettings");

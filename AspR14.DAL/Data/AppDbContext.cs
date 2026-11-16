@@ -22,60 +22,74 @@ namespace AspR14.DAL.Data
         }
 
         public override Task<int> SaveChangesAsync(
-            CancellationToken cancellationToken = default)
+     CancellationToken cancellationToken = default)
         {
-            var entries = ChangeTracker.Entries<AuditableEntity>();
+            var currentUserId = _httpContextAccessor.HttpContext?
+                .User.FindFirst(
+                    System.Security.Claims.ClaimTypes.NameIdentifier
+                )?.Value;
 
-            var currentUserId = _httpContextAccessor.HttpContext?.User?
-                .FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var entries = ChangeTracker.Entries<AuditableEntity>()
+                .Where(e => e.State == EntityState.Added ||
+                            e.State == EntityState.Modified)
+                .ToList();
+
+            if (entries.Count > 0 && string.IsNullOrEmpty(currentUserId))
+            {
+                throw new UnauthorizedAccessException(
+                    "Authenticated user is required to save auditable entities.");
+            }
 
             foreach (var entry in entries)
             {
                 if (entry.State == EntityState.Added)
                 {
-                    entry.Property(x => x.CreatedById).CurrentValue = currentUserId;
-                    entry.Property(x => x.CreatedOn).CurrentValue = DateTime.UtcNow;
+                    entry.Entity.CreatedById = currentUserId!;
+                    entry.Entity.CreatedOn = DateTime.UtcNow;
                 }
                 else if (entry.State == EntityState.Modified)
                 {
-                    entry.Property(x => x.UpdatedById).CurrentValue = currentUserId;
-                    entry.Property(x => x.UpdatedOn).CurrentValue = DateTime.UtcNow;
+                    entry.Entity.UpdatedById = currentUserId!;
+                    entry.Entity.UpdatedOn = DateTime.UtcNow;
+
+                    entry.Property(x => x.CreatedById).IsModified = false;
+                    entry.Property(x => x.CreatedOn).IsModified = false;
                 }
             }
 
             return base.SaveChangesAsync(cancellationToken);
         }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-{
-    base.OnModelCreating(modelBuilder);
+        {
+            base.OnModelCreating(modelBuilder);
 
-    modelBuilder.Entity<Category>()
-        .HasOne(c => c.CreatedBy)
-        .WithMany()
-        .HasForeignKey(c => c.CreatedById)
-        .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Category>()
+                .HasOne(c => c.CreatedBy)
+                .WithMany()
+                .HasForeignKey(c => c.CreatedById)
+                .OnDelete(DeleteBehavior.NoAction);
 
-    modelBuilder.Entity<Category>()
-        .HasOne(c => c.UpdatedBy)
-        .WithMany()
-        .HasForeignKey(c => c.UpdatedById)
-        .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Category>()
+                .HasOne(c => c.UpdatedBy)
+                .WithMany()
+                .HasForeignKey(c => c.UpdatedById)
+                .OnDelete(DeleteBehavior.NoAction);
 
-    modelBuilder.Entity<Product>()
-        .HasOne(p => p.CreatedBy)
-        .WithMany()
-        .HasForeignKey(p => p.CreatedById)
-        .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.CreatedBy)
+                .WithMany()
+                .HasForeignKey(p => p.CreatedById)
+                .OnDelete(DeleteBehavior.NoAction);
 
-    modelBuilder.Entity<Product>()
-        .HasOne(p => p.UpdatedBy)
-        .WithMany()
-        .HasForeignKey(p => p.UpdatedById)
-        .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.UpdatedBy)
+                .WithMany()
+                .HasForeignKey(p => p.UpdatedById)
+                .OnDelete(DeleteBehavior.NoAction);
 
-    modelBuilder.ApplyConfigurationsFromAssembly(
-        typeof(AppDbContext).Assembly);
-}
-   
+            modelBuilder.ApplyConfigurationsFromAssembly(
+                typeof(AppDbContext).Assembly);
+        }
     }
 }

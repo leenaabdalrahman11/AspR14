@@ -7,10 +7,10 @@ namespace AspR14.BLL.Services
 {
     public interface ICategoryService
     {
-        Task<CategoryResponse> CreateCategory(CategoryRequest request);
+        Task<Result<CategoryResponse>> CreateCategory(CategoryRequest request);
 
-        Task<List<CategoryResponse>> GetAllCategories();
-        Task<CategoryResponse> GetCategory(Expression<Func<Category, bool>> filter);
-        Task<bool> DeleteCategory(int id);
+        Task<Result<List<CategoryResponse>>> GetAllCategories();
+        Task<Result<CategoryResponse>> GetCategory(Expression<Func<Category, bool>> filter);
+        Task<Result<bool>> DeleteCategory(int id);
     }
 }

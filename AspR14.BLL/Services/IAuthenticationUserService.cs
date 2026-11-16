@@ -9,8 +9,8 @@ namespace AspR14.BLL.Services
 {
     public interface IAuthenticationUserService
     {
-        Task<RegisterResponse> RegisterAsync(RegisterRequest request);
-        Task<LoginResponse> LoginAsync(LoginRequest request);
-        Task<bool> ConfirmEmailAsync(ConfirmEmailRequest request);
+        Task<Result<bool>> RegisterAsync(RegisterRequest request);
+        Task<Result<LoginResponse>> LoginAsync(LoginRequest request);
+        Task<Result<bool>> ConfirmEmailAsync(ConfirmEmailRequest request);
     }
 }

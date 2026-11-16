@@ -23,26 +23,19 @@ namespace AspR14.PL.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             var result = await _authenticationService.RegisterAsync(request);
-            return Ok(result);
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var result = await _authenticationService.LoginAsync(request);
-            return Ok(result);
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
         [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailRequest request)
         {
             var result = await _authenticationService.ConfirmEmailAsync(request);
-            if (result)
-            {
-                return Ok(new { Message = "Email confirmed successfully." });
-            }
-            else
-            {
-                return BadRequest(new { Message = "Email confirmation failed." });
-            }
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
     }
 }

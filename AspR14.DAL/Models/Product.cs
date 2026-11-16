@@ -9,9 +9,10 @@ namespace AspR14.DAL.Models
     {
         public decimal Price { get; set; }
         public int Quantity { get; set; }
+        public decimal Discount { get; set; }
         public string MainImage { get; set; }
         public bool IsActive { get; set; }
-        public string? SubImages { get; set; }
+        public List<string>? SubImages { get; set; }
         public double Rate { get; set; }
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;

@@ -8,7 +8,6 @@ namespace AspR14.DAL.DTOs.Responses
 {
     public class LoginResponse
     {
-        public string Message { get; set; }
         public string AccessToken { get; set; }
         
     }

@@ -6,6 +6,6 @@ namespace AspR14.DAL.DTOs.Requests
 {
     public class CategoryRequest
     {
-        public string Name { get; set; } = string.Empty;
+        public List<CategoryTranslationRequest> Translations { get; set; } = new();
     }
 }

@@ -13,6 +13,9 @@ namespace AspR14.DAL.Configuration
 
             builder.HasMany(p => p.Translations)
                 .WithOne(t => t.Product);
+
+            builder.Property(p => p.Discount)
+            .HasPrecision(18, 2);
         }
     }
 }

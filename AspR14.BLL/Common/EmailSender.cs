@@ -4,22 +4,28 @@ using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace AspR14.BLL.Common
 {
     public class EmailSender : IEmailSender
     {
+        private readonly IConfiguration _configuration;
+        public EmailSender(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
         public Task SendEmailAsync(string email, string subject, string message)
         {
-            var client = new SmtpClient("smtp.gmail.com", 587)
+            var client = new SmtpClient(_configuration["EmailSettings:Host"], int.Parse(_configuration["EmailSettings:Port"]))
             {
                 EnableSsl = true,
                 UseDefaultCredentials = false,
-                Credentials = new NetworkCredential("leenasba02@gmail.com", "ftqe senk bbfr kvby")    
+                Credentials = new NetworkCredential(_configuration["EmailSettings:Email"], _configuration["EmailSettings:Password"])    
         };
         return client.SendMailAsync(
         new MailMessage(
-            from:"leenasba02@gmail.com",
+            from:_configuration["EmailSettings:Email"],
             to : email,
             subject,
             message)
