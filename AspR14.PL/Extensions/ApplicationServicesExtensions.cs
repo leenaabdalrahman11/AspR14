@@ -14,29 +14,22 @@ namespace AspR14.PL.Extensions
     {
         public static IServiceCollection AddApplicationServicesExtensions(this IServiceCollection services)
         {
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddScoped<IAuthenticationUserService, AuthenticationUserService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ISeedData, RoleSeedData>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<
-                        ICategoryRepository,
-                        CategoryRepository
-                    >();
-
-            services.AddScoped<
                 ICategoryService,
                 CategoryService
             >();
-            services.AddScoped<
-                IProductRepository,
-                ProductRepository>();
             services.AddScoped<
                 IProductService,
                 ProductService>();
 
             services.AddScoped<IFileService, FileService>();
-services.AddProblemDetails();
+            services.AddProblemDetails();
             return services;
         }
     }
