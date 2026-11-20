@@ -20,8 +20,6 @@ namespace AspR14.DAL.Repositories
         public async Task<T> CreateAsync(T request)
         {
             await _context.AddAsync(request);
-            await _context.SaveChangesAsync();
-
             return request;
         }
 
@@ -61,11 +59,9 @@ namespace AspR14.DAL.Repositories
             return affected > 0;
         }
 
-        public async Task<bool> DeleteAsync(T request)
+        public void Delete(T request)
         {
             _context.Remove(request);
-            var affected = await _context.SaveChangesAsync();
-            return affected > 0;
         }
     }
 }

@@ -11,8 +11,10 @@ namespace AspR14.DAL.Models
         public int Quantity { get; set; }
         public decimal Discount { get; set; }
         public string MainImage { get; set; }
+        public string MainImageUploadId { get; set; }
         public bool IsActive { get; set; }
         public List<string>? SubImages { get; set; }
+        public List<string>? SubImageUploadIds { get; set; }
         public double Rate { get; set; }
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;

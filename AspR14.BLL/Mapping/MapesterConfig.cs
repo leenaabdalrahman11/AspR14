@@ -27,13 +27,8 @@ namespace AspR14.BLL.Mapping
      src => src.Translations
          .Where(t => t.Language == CultureInfo.CurrentUICulture.Name)
          .Select(t => t.Language)
-         .FirstOrDefault())
-         .Map(dest => dest.MainImage,
-         src => "/uploads/" + src.MainImage)
-         .Map(dest => dest.SubImages,
-         src => src.SubImages.Select(img => "/uploads/" + img));
-         
-
+         .FirstOrDefault());
+       
             TypeAdapterConfig<ProductRequest, Product>
     .NewConfig()
     .Ignore(dest => dest.MainImage)

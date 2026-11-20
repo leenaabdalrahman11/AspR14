@@ -10,88 +10,57 @@ namespace AspR14.BLL.Services
 {
     public class CategoryService : ICategoryService
     {
-        private readonly ICategoryRepository _categoryRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CategoryService(ICategoryRepository categoryRepository)
+        public CategoryService(IUnitOfWork unitOfWork)
         {
-            _categoryRepository = categoryRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Result<List<CategoryResponse>>> GetAllCategories()
         {
-            var categories = await _categoryRepository.GetAllAsync(
+            var categories = await _unitOfWork.CategoryRepository.GetAllAsync(
 
               new string[] { nameof(Category.Translations), nameof(Category.CreatedBy) }
           );
-            return new Result<List<CategoryResponse>>
-            {
-                IsSuccess = true,
-                Message = "Successfully retrieved categories.",
-                Data = categories.Adapt<List<CategoryResponse>>()
-            };
-
+            return Result<List<CategoryResponse>>.Ok(categories.Adapt<List<CategoryResponse>>(), "Successfully retrieved all categories.");
         }
 
         public async Task<Result<CategoryResponse>> GetCategory(Expression<Func<Category, bool>> filter)
         {
-            var category = await _categoryRepository.GetOne(filter, new string[] { nameof(Category.Translations), nameof(Category.CreatedBy) });
+            var category = await _unitOfWork.CategoryRepository.GetOne(filter, new string[] { nameof(Category.Translations), nameof(Category.CreatedBy) });
+
             if (category == null)
             {
-                return new Result<CategoryResponse>
-                {
-                    IsSuccess = false,
-                    Message = "Category not found."
-                };
+                return Result<CategoryResponse>.Fail("Category not found.");
             }
-            return new Result<CategoryResponse>
-            {
-                IsSuccess = true,
-                Message = "Successfully retrieved category.",
-                Data = category.Adapt<CategoryResponse>()
-            };
+            return Result<CategoryResponse>.Ok(category.Adapt<CategoryResponse>(), "Successfully retrieved the category.");
 
         }
 
-        async Task<Result<CategoryResponse>> ICategoryService.CreateCategory(CategoryRequest request)
+        public async Task<Result<CategoryResponse>> CreateCategory(CategoryRequest request)
         {
             var category = request.Adapt<Category>();
 
-            await _categoryRepository.CreateAsync(category);
+            await _unitOfWork.CategoryRepository.CreateAsync(category);
             if (category == null)
             {
-                return new Result<CategoryResponse>
-                {
-                    IsSuccess = false,
-                    Message = "Failed to create category."
-                };
+                return Result<CategoryResponse>.Fail("Failed to create category.");
             }
-            return new Result<CategoryResponse>
-            {
-                IsSuccess = true,
-                Message = "Category created successfully.",
-                Data = category.Adapt<CategoryResponse>()
-            };
+            return Result<CategoryResponse>.Ok(category.Adapt<CategoryResponse>(), "Category created successfully.");
 
 
         }
         public async Task<Result<bool>> DeleteCategory(int id)
         {
-            var category = await _categoryRepository.GetOne(c => c.Id == id);
+            var category = await _unitOfWork.CategoryRepository.GetOne(c => c.Id == id);
             if (category == null)
             {
-                return new Result<bool>
-                {
-                    IsSuccess = false,
-                    Message = "Category not found."
-                };
+                return Result<bool>.Fail("Category not found.");
             }
-            var result = await _categoryRepository.DeleteAsync(category);
-            return new Result<bool>
-            {
-                IsSuccess = result,
-                Message = result ? "Category deleted successfully." : "Failed to delete category.",
-                Data = result
-            };
+            _unitOfWork.CategoryRepository.Delete(category);
+            var completed = await _unitOfWork.CompleteAsync();
+            return Result<bool>.Ok(completed > 0, completed > 0 ? "Category deleted successfully." : "Failed to delete category.");
         }
     }
 }

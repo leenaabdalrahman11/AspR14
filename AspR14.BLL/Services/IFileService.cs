@@ -9,6 +9,7 @@ namespace AspR14.BLL.Services
 {
     public interface IFileService
     {
-        Task<Result<string?>> UploadFileAsync(IFormFile file);
+        Task<Result<FileResult>> UploadFileAsync(IFormFile file);
+        Task<Result<bool>> DeleteAsync(string publicId);
     }
 }

@@ -13,27 +13,33 @@ namespace AspR14.BLL.Services
 {
     public class ProductService : IProductService
     {
-        private readonly IProductRepository _productRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IFileService _fileService;
 
-        public ProductService(IProductRepository productRepository, IFileService fileService)
+        public ProductService(IUnitOfWork unitOfWork, IFileService fileService)
         {
-            _productRepository = productRepository;
+            _unitOfWork = unitOfWork;
             _fileService = fileService;
         }
 
-        public async Task<Result<ProductResponse>> CreateProductAsync(ProductRequest productRequest)
+        public async Task<Result<ProductResponse>> CreateProductAsync(
+    ProductRequest productRequest)
         {
             if (productRequest.MainImage == null)
             {
-                return Result<ProductResponse>.Fail("Main image is required for product creation.");
+                return Result<ProductResponse>.Fail(
+                    "Main image is required for product creation.");
             }
-            var ImageUploaded = await _fileService.UploadFileAsync(productRequest.MainImage);
-            if (!ImageUploaded.IsSuccess)
+
+            var mainImageUploaded = await _fileService.UploadFileAsync(productRequest.MainImage);
+
+            if (!mainImageUploaded.IsSuccess || mainImageUploaded.Data == null)
             {
-                return Result<ProductResponse>.Fail($"Main image upload failed: {ImageUploaded.Message}");
+                return Result<ProductResponse>.Fail(
+                    $"Main image upload failed: {mainImageUploaded.Message}");
             }
-            var subImageNames = new List<string>();
+
+            var subImageDatas = new List<FileResult>();
 
             if (productRequest.SubImages != null)
             {
@@ -43,43 +49,53 @@ namespace AspR14.BLL.Services
 
                     if (!result.IsSuccess || result.Data == null)
                     {
-                        /*return new Result<ProductResponse>
-                        {
-                            IsSuccess = false,
-                            Message = $"Sub image upload failed: {result.Message}"
-                        };*/
-                        return Result<ProductResponse>.Fail($"Sub image upload failed: {result.Message}");
+                        return Result<ProductResponse>.Fail(
+                            $"Sub image upload failed: {result.Message}");
                     }
 
-                    subImageNames.Add(result.Data);
+                    subImageDatas.Add(result.Data);
                 }
             }
 
             var product = productRequest.Adapt<Product>();
 
-            product.MainImage = ImageUploaded.Data;
-            product.SubImages = subImageNames;
-            var createdProduct = await _productRepository.CreateAsync(product);
-            return Result<ProductResponse>.Ok(createdProduct.Adapt<ProductResponse>(), "Product created successfully.");
+            product.MainImage = mainImageUploaded.Data.FileUrl;//To Access the URL of the uploaded main image in Cloudinary for display the image in the application or for any other purpose where the image URL is needed.
+            product.MainImageUploadId = mainImageUploaded.Data.PublicId;//To Access the public ID of the uploaded main image in Cloudinary for future reference or deletion.
 
+            product.SubImages = subImageDatas.Select(d => d.FileUrl).ToList();
+            product.SubImageUploadIds = subImageDatas.Select(d => d.PublicId).ToList();
+
+            
+            await _unitOfWork.ProductRepository.CreateAsync(product);
+            await _unitOfWork.CompleteAsync();
+
+            return Result<ProductResponse>.Ok(product.Adapt<ProductResponse>(), "Product created successfully.");
         }
 
         public async Task<Result<bool>> DeleteProductAsync(Expression<Func<Product, bool>> predicate)
         {
-            var product = await _productRepository.GetOne(predicate);
+            var product = await _unitOfWork.ProductRepository.GetOne(predicate);
             if (product == null)
             {
                 return Result<bool>.Fail("Product not found.");
             }
+            await _fileService.DeleteAsync(product.MainImageUploadId);
+            if (product.SubImageUploadIds != null)
+            {
+                foreach (var subImageId in product.SubImageUploadIds)
+                {
+                    await _fileService.DeleteAsync(subImageId);
+                }
+            }
 
-            var result = await _productRepository.DeleteAsync(product);
-            return Result<bool>.Ok(result, result ? "Product deleted successfully." : "Failed to delete product.");
-
+            _unitOfWork.ProductRepository.Delete(product);
+            var completed = await _unitOfWork.CompleteAsync();
+            return Result<bool>.Ok(completed > 0, completed > 0 ? "Product deleted successfully." : "Failed to delete product.");
         }
 
         public async Task<Result<List<ProductResponse>>> GetAllProductsAsync()
         {
-            var products = await _productRepository.GetAllAsync(new string[]
+            var products = await _unitOfWork.ProductRepository.GetAllAsync(new string[]
             {
                     nameof(Product.Category),
                     nameof(Product.Translations)
@@ -90,7 +106,7 @@ namespace AspR14.BLL.Services
 
         public async Task<Result<ProductResponse>> GetProductByIdAsync(Expression<Func<Product, bool>> filter)
         {
-            var product = await _productRepository.GetOne(filter, new string[]
+            var product = await _unitOfWork.ProductRepository.GetOne(filter, new string[]
             {
                     nameof(Product.Category),
                     nameof(Product.Translations)
@@ -109,7 +125,7 @@ namespace AspR14.BLL.Services
             int productId,
             ProductRequest productRequest)
         {
-            var product = await _productRepository.GetOne(
+            var product = await _unitOfWork.ProductRepository.GetOne(
                 p => p.Id == productId
             );
 
@@ -131,7 +147,7 @@ namespace AspR14.BLL.Services
                     return Result<ProductResponse>.Fail($"Main image upload failed: {imageResult.Message}");
                 }
 
-                product.MainImage = imageResult.Data;
+                product.MainImage = imageResult.Data.FileUrl;
             }
             if (productRequest.SubImages != null)
             {
@@ -146,13 +162,13 @@ namespace AspR14.BLL.Services
                         return Result<ProductResponse>.Fail($"Sub image upload failed: {result.Message}");
                     }
 
-                    subImageNames.Add(result.Data);
+                    subImageNames.Add(result.Data.FileUrl);
                 }
 
                 product.SubImages = subImageNames;
             }
 
-            await _productRepository.UpdateAsync(product);
+            await _unitOfWork.ProductRepository.UpdateAsync(product);
 
             return Result<ProductResponse>.Ok(product.Adapt<ProductResponse>(), "Product updated successfully.");
 
