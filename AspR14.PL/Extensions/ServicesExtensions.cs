@@ -14,10 +14,10 @@ namespace AspR14.PL.Extensions
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
             services.AddDatabaseExtensions(configuration);  
-           services.AddIdentityExtensions();
+            services.AddIdentityExtensions();
 
             services.AddApplicationServicesExtensions();
-           services.AddAuthenticationExtensions(configuration);
+            services.AddAuthenticationExtensions(configuration);
             services.AddLocalizationExtension();
 
             return services;

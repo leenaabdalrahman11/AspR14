@@ -97,6 +97,33 @@ namespace AspR14.DAL.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("AspR14.DAL.Models.CartItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CartItems");
+                });
+
             modelBuilder.Entity("AspR14.DAL.Models.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -172,12 +199,17 @@ namespace AspR14.DAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Discount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<string>("MainImage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MainImageUploadId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -190,6 +222,9 @@ namespace AspR14.DAL.Migrations
 
                     b.Property<double>("Rate")
                         .HasColumnType("float");
+
+                    b.PrimitiveCollection<string>("SubImageUploadIds")
+                        .HasColumnType("nvarchar(max)");
 
                     b.PrimitiveCollection<string>("SubImages")
                         .HasColumnType("nvarchar(max)");
@@ -372,6 +407,25 @@ namespace AspR14.DAL.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("AspR14.DAL.Models.CartItem", b =>
+                {
+                    b.HasOne("AspR14.DAL.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AspR14.DAL.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AspR14.DAL.Models.Category", b =>

@@ -33,30 +33,15 @@ namespace AspR14.BLL.Services
             var user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null)
             {
-                return new Result<bool>
-                {
-                    IsSuccess = false,
-                    Message = "User not found",
-                    Data = false
-                };
+                return Result<bool>.Fail("User not found");
             }
             request.Token = Uri.UnescapeDataString(request.Token);
             var result = await _userManager.ConfirmEmailAsync(user, request.Token);
             if (!result.Succeeded)
             {
-                return new Result<bool>
-                {
-                    IsSuccess = false,
-                    Message = "Email confirmation failed",
-                    Data = false
-                };
+                return Result<bool>.Fail("Email confirmation failed. The token may be invalid or expired.");
             }
-            return new Result<bool>
-            {
-                IsSuccess = true,
-                Message = "Email confirmed successfully",
-                Data = true
-            };
+            return Result<bool>.Ok(true, "Email confirmed successfully.");
 
 
         }
@@ -65,38 +50,23 @@ namespace AspR14.BLL.Services
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                return new Result<LoginResponse>
-                {
-                    IsSuccess = false,
-                    Message = "User not found"
-                };
+                return Result<LoginResponse>.Fail("User not found");
             }
             if (await _userManager.IsEmailConfirmedAsync(user) == false)
             {
-                return new Result<LoginResponse>
-                {
-                    IsSuccess = false,
-                    Message = "Email not confirmed"
-                };
+                return Result<LoginResponse>.Fail("Email not confirmed");
             }
             var result = await _userManager.CheckPasswordAsync(user, request.Password);
             if (!result)
             {
-                return new Result<LoginResponse>
-                {
-                    IsSuccess = false,
-                    Message = "Invalid password"
-                };
+                return Result<LoginResponse>.Fail("Invalid password");
             }
-            return new Result<LoginResponse>
-            {
-                IsSuccess = true,
-                Message = "Login successful",
-                Data = new LoginResponse
+            return Result<LoginResponse>.Ok(
+                new LoginResponse
                 {
                     AccessToken = await GenerateJWTToken(user)
-                }
-            };
+                }, "Login successful"
+            );
         }
 
         public async Task<Result<bool>> RegisterAsync(RegisterRequest request)
@@ -108,27 +78,16 @@ namespace AspR14.BLL.Services
 
             if (!result.Succeeded)
             {
-                return new Result<bool>
-                {
-                    IsSuccess = false,
-                    Message = "User registration failed",
-                    Errors = result.Errors.Select(e => e.Description).ToList(),
-                };
-
+                return Result<bool>.Fail("User registration failed");
             }
+
             var Token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             Token = Uri.EscapeDataString(Token);
             var emailUrl = $"https://localhost:5106/Account/ConfirmEmail?token={Token}&userId={user.Id}";
             await _emailSender.SendEmailAsync(request.Email, "confirm email", "<div><h1>Welcome to our application</h1>" +
             $"<a href='{emailUrl}'>Click here to confirm your email</a>" +
             "</div>");
-            return new Result<bool>
-            {
-                IsSuccess = true,
-                Message = "User registered successfully. Please check your email to confirm your account.",
-                Data = true
-
-            };
+            return Result<bool>.Ok(true, "User registered successfully. Please check your email to confirm your account.");
 
         }
 

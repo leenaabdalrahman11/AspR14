@@ -21,7 +21,7 @@ namespace AspR14.BLL.Services
         {
             var categories = await _unitOfWork.CategoryRepository.GetAllAsync(
 
-              new string[] { nameof(Category.Translations), nameof(Category.CreatedBy) }
+              includes: new string[] { nameof(Category.Translations), nameof(Category.CreatedBy) }
           );
             return Result<List<CategoryResponse>>.Ok(categories.Adapt<List<CategoryResponse>>(), "Successfully retrieved all categories.");
         }

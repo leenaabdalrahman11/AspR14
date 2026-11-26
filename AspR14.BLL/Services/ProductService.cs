@@ -23,7 +23,7 @@ namespace AspR14.BLL.Services
         }
 
         public async Task<Result<ProductResponse>> CreateProductAsync(
-    ProductRequest productRequest)
+        ProductRequest productRequest)
         {
             if (productRequest.MainImage == null)
             {
@@ -65,7 +65,7 @@ namespace AspR14.BLL.Services
             product.SubImages = subImageDatas.Select(d => d.FileUrl).ToList();
             product.SubImageUploadIds = subImageDatas.Select(d => d.PublicId).ToList();
 
-            
+
             await _unitOfWork.ProductRepository.CreateAsync(product);
             await _unitOfWork.CompleteAsync();
 

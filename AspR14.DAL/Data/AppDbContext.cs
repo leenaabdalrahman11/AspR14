@@ -14,6 +14,8 @@ namespace AspR14.DAL.Data
         public DbSet<CategoryTranslation> CategoryTranslations { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductTranslation> ProductTranslations { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAccessor httpContextAccessor) : base(options)

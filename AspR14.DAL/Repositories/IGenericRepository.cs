@@ -10,7 +10,7 @@ namespace AspR14.DAL.Repositories
     {
         Task<T> CreateAsync(T request);
 
-        Task<List<T>> GetAllAsync(string[]? includes = null);
+        Task<List<T>> GetAllAsync(Expression<Func<T ,bool>>? filter= null , string[]? includes = null);
         Task<T> GetOne(Expression<Func<T ,bool>> filter, string[]? includes=null);
         Task<bool> UpdateAsync(T request);
         void Delete(T request);

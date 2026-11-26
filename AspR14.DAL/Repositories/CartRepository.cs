@@ -1,0 +1,17 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AspR14.DAL.Data;
+using AspR14.DAL.Models;
+
+namespace AspR14.DAL.Repositories
+{
+    public class CartRepository : GenericRepository<CartItem>, ICartRepository
+    {
+        public CartRepository(AppDbContext context) : base(context)
+        {
+            
+        }
+    }
+}

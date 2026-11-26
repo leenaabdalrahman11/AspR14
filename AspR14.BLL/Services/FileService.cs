@@ -15,11 +15,24 @@ namespace AspR14.BLL.Services
         private readonly Cloudinary _cloudinary;
         public FileService(IConfiguration configuration)
         {
+            var cloudName = configuration["CloudinarySettings:CloudName"];
+            var apiKey = configuration["CloudinarySettings:ApiKey"];
+            var apiSecret = configuration["CloudinarySettings:ApiSecret"];
+
+            if (string.IsNullOrWhiteSpace(cloudName) ||
+                string.IsNullOrWhiteSpace(apiKey) ||
+                string.IsNullOrWhiteSpace(apiSecret))
+            {
+                throw new InvalidOperationException(
+                    "Cloudinary configuration is missing.");
+            }
+
             var account = new Account(
-                configuration["CloudinarySettings:CloudName"],
-                configuration["CloudinarySettings:ApiKey"],
-                configuration["CloudinarySettings:ApiSecret"]
+                cloudName,
+                apiKey,
+                apiSecret
             );
+
             _cloudinary = new Cloudinary(account);
         }
 
@@ -52,13 +65,13 @@ namespace AspR14.BLL.Services
                     return Result<FileResult>.Fail(uploadResult.Error.Message);
                 }
                 return Result<FileResult>.Ok(
-     new FileResult
-     {
-         FileUrl = uploadResult.SecureUrl.ToString(),
-         PublicId = uploadResult.PublicId
-     },
-     "File uploaded successfully."
- );
+                new FileResult
+                {
+                    FileUrl = uploadResult.SecureUrl.ToString(),
+                    PublicId = uploadResult.PublicId
+                },
+                "File uploaded successfully."
+                );
             }
         }
 

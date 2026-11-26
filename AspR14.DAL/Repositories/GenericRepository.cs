@@ -7,9 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AspR14.DAL.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T>
-    
-    
-     where T : class
+     where T : class // T is a reference type, not a struct or primitive type
     {
         private readonly AppDbContext _context;
         public GenericRepository(AppDbContext context)
@@ -23,8 +21,7 @@ namespace AspR14.DAL.Repositories
             return request;
         }
 
-
-        public async Task<List<T>> GetAllAsync(string[]? includes = null)
+        public async Task<List<T>> GetAllAsync(Expression<Func<T ,bool>>? filter= null , string[]? includes = null)
         {
             IQueryable<T> query = _context.Set<T>();//Store the data in the server's RAM and wait,Jaida may edit it later 
             if (includes != null)
@@ -35,6 +32,10 @@ namespace AspR14.DAL.Repositories
                 }
                 return await query.ToListAsync();
                 
+            }
+            if(filter is not null)
+            {
+                query = query.Where(filter);
             }
             //var data = _context.Set<T>().ToListAsync();// give me data from Db and put them on user ram
             return await query.ToListAsync();

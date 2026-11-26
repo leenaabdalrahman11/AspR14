@@ -14,7 +14,7 @@ namespace AspR14.DAL.Repositories
 
         private ICategoryRepository? _categoryRepository;
         private IProductRepository? _productRepository;
-
+        private ICartRepository? _cartRepository;
         public ICategoryRepository CategoryRepository
         {
             get
@@ -40,6 +40,18 @@ namespace AspR14.DAL.Repositories
                 return _productRepository;
             }
         }
+        public ICartRepository CartRepository
+        {
+            get
+            {
+                if (_cartRepository is null)
+                {
+                    _cartRepository = new CartRepository(_context);
+                }
+
+                return _cartRepository;
+            }
+        }
 
         public UnitOfWork(AppDbContext context)
         {
@@ -49,6 +61,11 @@ namespace AspR14.DAL.Repositories
         public async Task<int> CompleteAsync()
         {
             return await _context.SaveChangesAsync();
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }

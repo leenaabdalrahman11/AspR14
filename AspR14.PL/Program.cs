@@ -23,8 +23,6 @@ namespace AspR14.PL
         {
             var builder = WebApplication.CreateBuilder(args);
 
-
-
             builder.Services.AddServicesExtensions(builder.Configuration);
             var app = builder.Build();
             app.UseExceptionHandler();
@@ -36,10 +34,10 @@ namespace AspR14.PL
                     .Value
             );
             app.UseRequestLocalization(
-    app.Services
-        .GetRequiredService<IOptions<RequestLocalizationOptions>>()
-        .Value
-);
+            app.Services
+               .GetRequiredService<IOptions<RequestLocalizationOptions>>()
+               .Value
+            );
 
             app.Use(async (context, next) =>
             {
@@ -54,7 +52,7 @@ namespace AspR14.PL
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            app.UseStaticFiles();
+            //app.UseStaticFiles();
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
